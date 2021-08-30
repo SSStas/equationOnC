@@ -3,10 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
-
-#define IN 1
-#define OUT 0
-
+#include "input.h"
 
 int isNumber(char word[], int lenWord)
 {
