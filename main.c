@@ -14,6 +14,7 @@ int main()
     getConstants(&a, &b, &c);
 
 	struct RootsOfEquation answer = quadraticEq(a, b, c);
+
 	showFuncOfQuadraticEq(a, b, c);
 	showAnswer(answer);
 

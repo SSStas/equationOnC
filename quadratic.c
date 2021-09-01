@@ -1,26 +1,38 @@
 #include <stdio.h>
 #include <locale.h>
+#include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 #include "quadratic.h"
 
 
 int checkEqualityWithZero(double value)
 {
-    return -0.0000005 < value && value < 0.0000005;
+    assert( isfinite(value) );
+
+    return fabs(value) < 0.0000005;
 }
 
 char getSignOfDouble(double value)
 {
+    assert( isfinite(value) );
+
     return (value >= 0.0 ? '+' : '-');
 }
 
 double getRoundDouble(double value, int signsAfterPoint)
 {
+    assert( isfinite(value) );
+    assert( signsAfterPoint >= 0 );
+
     return roundf(value * pow(10, signsAfterPoint)) / pow(10, signsAfterPoint);
 }
 
 void swapDoubles(double *value1, double *value2)
 {
+    assert( value1 != NULL );
+    assert( value2 != NULL );
+
     double saveRoot = *value1;
     *value1 = *value2;
     *value2 = saveRoot;
@@ -28,6 +40,16 @@ void swapDoubles(double *value1, double *value2)
 
 void showAnswer(struct RootsOfEquation answer)
 {
+    if ( !isfinite(answer.value[0]) && answer.solutionsCount == ONE_SOLUTION) {
+        printf("Error: Invalid value of answer\n");
+        return;
+    }
+
+    if ( (!isfinite(answer.value[0]) || !isfinite(answer.value[1]))  && answer.solutionsCount == TWO_SOLUTIONS) {
+        printf("Error: Invalid value(s) of answer\n");
+        return;
+    }
+
 	switch (answer.solutionsCount)
 	{
         case ONE_SOLUTION:
@@ -39,20 +61,28 @@ void showAnswer(struct RootsOfEquation answer)
         case NO_SOLUTIONS:
             printf("Answer: Not at any value of x\n"); break;
         default:
-            printf("Error\n"); break;
+            printf("Error: There is no correct answer\n"); break;
 	}
 }
 
 void showFuncOfQuadraticEq(double a, double b, double c)
 {
-    char bSign = getSignOfDouble(getRoundDouble(b, 6)), cSign = getSignOfDouble(getRoundDouble(c, 6));
-    double formatedB = fabs(getRoundDouble(b, 6)), formatedC = fabs(getRoundDouble(c, 6));
-    printf("%lf * x^2 %c %lf * x %c %lf = 0\n", getRoundDouble(a, 6), bSign, formatedB, cSign, formatedC);
+    if ( !(isfinite(a) && isfinite(b) && isfinite(c)) ) {
+        printf("Error: Invalid value types\n");
+        return;
+    }
+
+    char bSign = getSignOfDouble(b), cSign = getSignOfDouble(c);
+    double formatedB = fabs(b), formatedC = fabs(c);
+    printf("%lf * x^2 %c %lf * x %c %lf = 0\n", a, bSign, formatedB, cSign, formatedC);
 }
 
 // решение уравнения вида b*x + c = 0
 struct RootsOfEquation linearEq(double b, double c)
 {
+    if ( !(isfinite(b) && isfinite(c)) )
+        return { { NAN, NAN }, DOES_NOT_EXIST };
+
 	if (checkEqualityWithZero(b)) {
 
         if (checkEqualityWithZero(c))
@@ -67,6 +97,9 @@ struct RootsOfEquation linearEq(double b, double c)
 // решение уравнения вида a*x^2 + b*x + c = 0
 struct RootsOfEquation quadraticEq(double a, double b, double c)
 {
+    if ( !(isfinite(a) && isfinite(b) && isfinite(c)) )
+        return { { NAN, NAN }, DOES_NOT_EXIST };
+
 	if (checkEqualityWithZero(a))
 		return linearEq(b, c);
 

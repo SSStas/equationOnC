@@ -2,33 +2,44 @@
 #include <locale.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 #include "quadratic.h"
 
-enum TestResults {ERROR, OK};
-enum KindsComments {ITS_NOT_COMMENT, LINEAR_COMMENT, MULTILINEAR_COMMENT};
+enum TestResults {
+    ERROR = 0,
+    OK = 1
+};
+
+enum KindsComments {
+    ITS_NOT_COMMENT = 0,
+    LINEAR_COMMENT = 1,
+    MULTILINEAR_COMMENT = 2
+};
+
 
 int isTwoDoubleEqual(double value1, double value2)
 {
-    if (isnan(value1) || isnan(value2))
-        return 0;
-    else
-        return (fabs(value1 - value2) < 0.000001 ? 1 : 0);
+    return ( (isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < 0.000001) : 0 );
 }
 
 enum KindsComments isComment(char word[])
 {
-    if (word[0] == '#' && word[1] == '#' && word[2] == '#') {
+    assert( word != NULL );
+
+    if (word[0] == '#' && word[1] == '#' && word[2] == '#')
         return MULTILINEAR_COMMENT;
-    } else if (word[0] == '#') {
+
+    if (word[0] == '#')
         return LINEAR_COMMENT;
-    } else {
-        return ITS_NOT_COMMENT;
-    }
+
+    return ITS_NOT_COMMENT;
 }
 
 void passLinearComments(FILE *file)
 {
-    char ch;
+    assert( file != NULL );
+
+    char ch = '0';
     while ((ch = fgetc(file)) != EOF)
         if (ch == '\n')
             break;
@@ -36,7 +47,9 @@ void passLinearComments(FILE *file)
 
 void passMultilinearComment(FILE *file)
 {
-    char extraString[1000];
+    assert( file != NULL );
+
+    char extraString[1000] = {};
     int isEOF = 0;
     while (!isEOF) {
         isEOF = ( (fscanf(file, "%s", &extraString) == -1) ? 1 : 0);
@@ -48,7 +61,10 @@ void passMultilinearComment(FILE *file)
 
 int getIntNumFromFile(FILE *file, int *value)
 {
-    char extraString[1000];
+    assert( file != NULL );
+    assert( value != NULL );
+
+    char extraString[1000] = {};
     int isGetNum = 0;
     while (!isGetNum) {
         isGetNum = fscanf(file, "%d", value);
@@ -62,12 +78,15 @@ int getIntNumFromFile(FILE *file, int *value)
                 passMultilinearComment(file);
         }
     }
-    return (isGetNum == -1 ? 0: 1);
+    return isGetNum != -1;
 }
 
 int getDoubleNumFromFile(FILE *file, double *value)
 {
-    char extraString[1000];
+    assert( file != NULL );
+    assert( value != NULL );
+
+    char extraString[1000] = {};
     int isGetNum = 0;
     while (!isGetNum) {
         isGetNum = fscanf(file, "%lf", value);
@@ -82,33 +101,45 @@ int getDoubleNumFromFile(FILE *file, double *value)
         }
     }
 
-    return (isGetNum == -1 ? 0: 1);
+    return isGetNum != -1;
 }
 
 void showTestResult(int number, double a, double b, double c, struct RootsOfEquation testAnswer, struct RootsOfEquation programAnswer)
 {
+    assert( isfinite(a) );
+    assert( isfinite(b) );
+    assert( isfinite(c) );
+
     int lenTitle = floorf(log10(number)) + 7;
     for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++) { printf("-"); }
     printf("\nTest #%d\n", number);
     for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++) { printf("-"); }
+
     printf("\n\n");
+
     printf("Equation: ");
     showFuncOfQuadraticEq(a, b, c);
+
     printf("\nProgram output:\n");
     showAnswer(programAnswer);
+
     printf("\nTest output:\n");
     showAnswer(testAnswer);
+
     printf("\n");
 }
 
 void testingQuadraticEq()
 {
-    enum TestResults shortTestResults[1000];
+    enum TestResults shortTestResults[1000] = { ERROR };
     int countTestResults = 0;
     int isErrorInFile = 0;
-    FILE *dataTestsFile;
-    dataTestsFile = fopen("tests.txt", "r");
+    FILE *dataTestsFile = fopen("tests.txt", "r");
 
+    if (dataTestsFile == NULL) {
+        printf("Error: Could not read the file \"tests.txt\"\n");
+        return;
+    }
 
     int isContinueInput = 1;
     while (isContinueInput) {
@@ -128,7 +159,7 @@ void testingQuadraticEq()
             break;
         }
 
-        if (isnan(testA) || isnan(testB) || isnan(testC))
+        if ( !(isfinite(testA) && isfinite(testB) && isfinite(testC)) )
         {
             printf("Error: Invalid values\n");
             isErrorInFile = 1;
