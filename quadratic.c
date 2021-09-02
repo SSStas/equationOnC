@@ -6,11 +6,9 @@
 #include "quadratic.h"
 
 
-int checkEqualityWithZero(double value)
+int isTwoDoubleEqual(double value1, double value2)
 {
-    assert( isfinite(value) );
-
-    return fabs(value) < 0.0000005;
+    return ( (isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < 0.000001) : 0 );
 }
 
 char getSignOfDouble(double value)
@@ -18,14 +16,6 @@ char getSignOfDouble(double value)
     assert( isfinite(value) );
 
     return (value >= 0.0 ? '+' : '-');
-}
-
-double getRoundDouble(double value, int signsAfterPoint)
-{
-    assert( isfinite(value) );
-    assert( signsAfterPoint >= 0 );
-
-    return roundf(value * pow(10, signsAfterPoint)) / pow(10, signsAfterPoint);
 }
 
 void swapDoubles(double *value1, double *value2)
@@ -83,15 +73,15 @@ struct RootsOfEquation linearEq(double b, double c)
     if ( !(isfinite(b) && isfinite(c)) )
         return { { NAN, NAN }, DOES_NOT_EXIST };
 
-	if (checkEqualityWithZero(b)) {
+	if (isTwoDoubleEqual(b, 0.0)) {
 
-        if (checkEqualityWithZero(c))
+        if (isTwoDoubleEqual(c, 0.0))
             return { { 0, 0 }, ALL_SOLUTIONS };
         else
             return { { 0, 0 }, NO_SOLUTIONS };
 
 	} else
-		return { { getRoundDouble( -c / b, 6), 0 }, ONE_SOLUTION };
+		return { { -c / b, 0 }, ONE_SOLUTION };
 }
 
 // решение уравнения вида a*x^2 + b*x + c = 0
@@ -100,13 +90,13 @@ struct RootsOfEquation quadraticEq(double a, double b, double c)
     if ( !(isfinite(a) && isfinite(b) && isfinite(c)) )
         return { { NAN, NAN }, DOES_NOT_EXIST };
 
-	if (checkEqualityWithZero(a))
+	if (isTwoDoubleEqual(a, 0.0))
 		return linearEq(b, c);
 
 	double d = b * b - 4.0 * a * c;
 
 	if (0 <= d && d <= 0.000001)
-		return { { getRoundDouble(-b / (2 * a), 6), 0 }, ONE_SOLUTION };
+		return { { -b / (2 * a), 0 }, ONE_SOLUTION };
 	else {
 
         if (d > 0) {
@@ -114,7 +104,7 @@ struct RootsOfEquation quadraticEq(double a, double b, double c)
             if (root1 > root2)
                 swapDoubles(&root1, &root2);
 
-            return { { getRoundDouble( root1, 6 ), getRoundDouble( root2, 6 ) }, TWO_SOLUTIONS };
+            return { { root1, root2 }, TWO_SOLUTIONS };
         }
         else
             return { { 0, 0 }, NO_SOLUTIONS };

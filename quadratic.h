@@ -54,4 +54,14 @@ struct RootsOfEquation linearEq(double b, double c);
 struct RootsOfEquation quadraticEq(double a, double b, double c);
 
 
+/*!
+    \brief Сравнивает два вещественных числа.
+    \param [in] value1  первое число.
+    \param [in] value2  второе число.
+    \return 1 - если два числа равны и 0 - если нет.
+
+    \note Сравнение происходит с погрешностью  до 0.000001
+*/
+int isTwoDoubleEqual(double value1, double value2);
+
 #endif // QUADRATIC_H_INCLUDED

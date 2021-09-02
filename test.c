@@ -17,11 +17,6 @@ enum KindsComments {
 };
 
 
-int isTwoDoubleEqual(double value1, double value2)
-{
-    return ( (isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < 0.000001) : 0 );
-}
-
 enum KindsComments isComment(char word[])
 {
     assert( word != NULL );
