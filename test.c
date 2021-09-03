@@ -17,8 +17,7 @@ enum KindsComments {
 };
 
 
-enum KindsComments isComment(char word[])
-{
+enum KindsComments isComment(char word[]) {
     assert( word != NULL );
 
     if (word[0] == '#' && word[1] == '#' && word[2] == '#')
@@ -30,8 +29,7 @@ enum KindsComments isComment(char word[])
     return ITS_NOT_COMMENT;
 }
 
-void passLinearComments(FILE *file)
-{
+void passLinearComments(FILE *file) {
     assert( file != NULL );
 
     char ch = '0';
@@ -40,8 +38,7 @@ void passLinearComments(FILE *file)
             break;
 }
 
-void passMultilinearComment(FILE *file)
-{
+void passMultilinearComment(FILE *file) {
     assert( file != NULL );
 
     char extraString[1000] = {};
@@ -53,8 +50,7 @@ void passMultilinearComment(FILE *file)
     }
 }
 
-int getIntNumFromFile(FILE *file, int *value)
-{
+int getIntNumFromFile(FILE *file, int *value) {
     assert( file != NULL );
     assert( value != NULL );
 
@@ -75,8 +71,7 @@ int getIntNumFromFile(FILE *file, int *value)
     return isGetNum != -1;
 }
 
-int getDoubleNumFromFile(FILE *file, double *value)
-{
+int getDoubleNumFromFile(FILE *file, double *value) {
     assert( file != NULL );
     assert( value != NULL );
 
@@ -96,8 +91,7 @@ int getDoubleNumFromFile(FILE *file, double *value)
     return isGetNum != -1;
 }
 
-void showTestResult(int number, double a, double b, double c, struct RootsOfEquation testAnswer, struct RootsOfEquation programAnswer)
-{
+void showTestResult(int number, double a, double b, double c, struct RootsOfEquation testAnswer, struct RootsOfEquation programAnswer) {
     assert( isfinite(a) );
     assert( isfinite(b) );
     assert( isfinite(c) );
@@ -116,8 +110,7 @@ void showTestResult(int number, double a, double b, double c, struct RootsOfEqua
     printf("\n");
 }
 
-void testingQuadraticEq()
-{
+void testingQuadraticEq() {
     enum TestResults shortTestResults[1000] = { ERROR };
     int countTestResults = 0;
     int isErrorInFile = 0;
@@ -227,8 +220,7 @@ void testingQuadraticEq()
     fclose(dataTestsFile);
 }
 
-int main()
-{
+int main() {
 	printf("Unit-tests of the quadratic equations:\n");
 	testingQuadraticEq();
 

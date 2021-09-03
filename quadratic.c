@@ -6,20 +6,17 @@
 #include "quadratic.h"
 
 
-int isTwoDoubleEqual(double value1, double value2)
-{
+int isTwoDoubleEqual(double value1, double value2) {
     return ( (isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < 0.000001) : 0 );
 }
 
-char getSignOfDouble(double value)
-{
+char getSignOfDouble(double value) {
     assert( isfinite(value) );
 
     return (value >= 0.0 ? '+' : '-');
 }
 
-void swapDoubles(double *value1, double *value2)
-{
+void swapDoubles(double *value1, double *value2) {
     assert( value1 != NULL );
     assert( value2 != NULL );
 
@@ -28,8 +25,7 @@ void swapDoubles(double *value1, double *value2)
     *value2 = saveRoot;
 }
 
-void showAnswer(struct RootsOfEquation answer)
-{
+void showAnswer(struct RootsOfEquation answer) {
     if ( !isfinite(answer.value[0]) && answer.solutionsCount == ONE_SOLUTION) {
         printf("Error: Invalid value of answer\n");
         return;
@@ -59,8 +55,7 @@ void showAnswer(struct RootsOfEquation answer)
 	}
 }
 
-void showFuncOfQuadraticEq(double a, double b, double c)
-{
+void showFuncOfQuadraticEq(double a, double b, double c) {
     if ( !(isfinite(a) && isfinite(b) && isfinite(c)) ) {
         printf("Error: Invalid value types\n");
         return;
@@ -72,8 +67,7 @@ void showFuncOfQuadraticEq(double a, double b, double c)
 }
 
 // решение уравнения вида b*x + c = 0
-struct RootsOfEquation linearEq(double b, double c)
-{
+struct RootsOfEquation linearEq(double b, double c) {
     if ( !(isfinite(b) && isfinite(c)) )
         return { { NAN, NAN }, DOES_NOT_EXIST };
 
@@ -87,8 +81,7 @@ struct RootsOfEquation linearEq(double b, double c)
 }
 
 // решение уравнения вида a*x^2 + b*x + c = 0
-struct RootsOfEquation quadraticEq(double a, double b, double c)
-{
+struct RootsOfEquation quadraticEq(double a, double b, double c) {
     if ( !(isfinite(a) && isfinite(b) && isfinite(c)) )
         return { { NAN, NAN }, DOES_NOT_EXIST };
 

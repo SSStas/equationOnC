@@ -4,13 +4,11 @@
 #include "quadratic.h"
 
 
-void cleanBuffer()
-{
-    while (getchar() != '\n') { ; }
+void cleanBuffer() {
+    while (getchar() != '\n') {;}
 }
 
-void getConstants(double *a, double *b, double *c)
-{
+void getConstants(double *a, double *b, double *c) {
     int isContinue = 1;
     while (isContinue) {
         int countOfConstants = scanf("%lf %lf %lf", a, b, c);
@@ -22,8 +20,7 @@ void getConstants(double *a, double *b, double *c)
     }
 }
 
-int main()
-{
+int main() {
     double a = NAN, b = NAN, c = NAN;
 
     printf("Enter the values of the variables a, b and c (separated by a space):\n");
