@@ -48,7 +48,6 @@ void passMultilinearComment(FILE *file)
     int isEOF = 0;
     while (!isEOF) {
         isEOF = ( (fscanf(file, "%s", &extraString) == -1) ? 1 : 0);
-
         if (isComment(extraString) == MULTILINEAR_COMMENT)
             break;
     }
@@ -63,7 +62,6 @@ int getIntNumFromFile(FILE *file, int *value)
     int isGetNum = 0;
     while (!isGetNum) {
         isGetNum = fscanf(file, "%d", value);
-
         if (!isGetNum) {
             fscanf(file, "%s", &extraString);
 
@@ -73,6 +71,7 @@ int getIntNumFromFile(FILE *file, int *value)
                 passMultilinearComment(file);
         }
     }
+
     return isGetNum != -1;
 }
 
@@ -85,10 +84,8 @@ int getDoubleNumFromFile(FILE *file, double *value)
     int isGetNum = 0;
     while (!isGetNum) {
         isGetNum = fscanf(file, "%lf", value);
-
         if (!isGetNum) {
             fscanf(file, "%s", &extraString);
-
             if (isComment(extraString) == LINEAR_COMMENT)
                 passLinearComments(file);
             else if (isComment(extraString) == MULTILINEAR_COMMENT)
@@ -110,17 +107,12 @@ void showTestResult(int number, double a, double b, double c, struct RootsOfEqua
     printf("\nTest #%d\n", number);
     for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++) { printf("-"); }
 
-    printf("\n\n");
-
-    printf("Equation: ");
+    printf("\n\nEquation: ");
     showFuncOfQuadraticEq(a, b, c);
-
     printf("\nProgram output:\n");
     showAnswer(programAnswer);
-
     printf("\nTest output:\n");
     showAnswer(testAnswer);
-
     printf("\n");
 }
 
@@ -154,8 +146,7 @@ void testingQuadraticEq()
             break;
         }
 
-        if ( !(isfinite(testA) && isfinite(testB) && isfinite(testC)) )
-        {
+        if ( !(isfinite(testA) && isfinite(testB) && isfinite(testC)) ) {
             printf("Error: Invalid values\n");
             isErrorInFile = 1;
             break;
@@ -169,48 +160,36 @@ void testingQuadraticEq()
         }
 
         double testRootOfEq1 = NAN, testRootOfEq2 = NAN;
-
         struct RootsOfEquation programAnswer = quadraticEq(testA, testB, testC);
-
-
-        switch (kindAnswer)
-        {
+        switch (kindAnswer) {
             case ONE_SOLUTION:
                 if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq1)) == 1) {
-
                     if (programAnswer.solutionsCount == ONE_SOLUTION && isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1))
                         shortTestResults[countTestResults++] = OK;
                     else
                         shortTestResults[countTestResults++] = ERROR;
-
                 } else {
                     printf("Error: Could not read the value of the root\n");
                     isErrorInFile = 1;
                 }
-
                 break;
 
             case TWO_SOLUTIONS:
                 if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq1)) == 1) {
-
                     if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq2)) == 1) {
-
-                        if (programAnswer.solutionsCount == TWO_SOLUTIONS && isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1) &&
-                            isTwoDoubleEqual(programAnswer.value[1], testRootOfEq2))
+                        if (programAnswer.solutionsCount == TWO_SOLUTIONS && isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1)
+                        && isTwoDoubleEqual(programAnswer.value[1], testRootOfEq2))
                             shortTestResults[countTestResults++] = OK;
                         else
                             shortTestResults[countTestResults++] = ERROR;
-
                     } else {
                         printf("Error: Could not read the value of the second root\n");
                         isErrorInFile = 1;
                     }
-
                 } else {
                     printf("Error: Could not read the value of the first root\n");
                     isErrorInFile = 1;
                 }
-
                 break;
 
             case ALL_SOLUTIONS:
@@ -218,7 +197,6 @@ void testingQuadraticEq()
                     shortTestResults[countTestResults++] = OK;
                 else
                     shortTestResults[countTestResults++] = ERROR;
-
                 break;
 
             case NO_SOLUTIONS:
@@ -226,14 +204,12 @@ void testingQuadraticEq()
                     shortTestResults[countTestResults++] = OK;
                 else
                     shortTestResults[countTestResults++] = ERROR;
-
                 break;
 
             default:
                 isContinueInput = 0;
                 printf("Error: Invalid value of answer's type\n");
                 isErrorInFile = 1;
-
                 break;
         }
 
@@ -243,19 +219,16 @@ void testingQuadraticEq()
         }
     }
 
-
     // коротко выводит результаты о том, какие тесты пройдены, а какие нет
     if (!isErrorInFile)
         for (int testNum = 0; testNum < countTestResults; testNum++)
             printf("Test #%d: %s\n", testNum + 1, ( (shortTestResults[testNum]) ? "OK" : "ERROR") );
-
 
     fclose(dataTestsFile);
 }
 
 int main()
 {
-
 	printf("Unit-tests of the quadratic equations:\n");
 	testingQuadraticEq();
 

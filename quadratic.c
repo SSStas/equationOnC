@@ -40,18 +40,22 @@ void showAnswer(struct RootsOfEquation answer)
         return;
     }
 
-	switch (answer.solutionsCount)
-	{
+	switch (answer.solutionsCount) {
         case ONE_SOLUTION:
-            printf("Answer: x = %lf\n", answer.value[0]); break;
+            printf("Answer: x = %lf\n", answer.value[0]);
+            break;
         case TWO_SOLUTIONS:
-            printf("Answer: x1 = %lf, x2 = %lf\n", answer.value[0], answer.value[1]); break;
+            printf("Answer: x1 = %lf, x2 = %lf\n", answer.value[0], answer.value[1]);
+            break;
         case ALL_SOLUTIONS:
-            printf("Answer: For any value of x\n"); break;
+            printf("Answer: For any value of x\n");
+            break;
         case NO_SOLUTIONS:
-            printf("Answer: Not at any value of x\n"); break;
+            printf("Answer: Not at any value of x\n");
+            break;
         default:
-            printf("Error: There is no correct answer\n"); break;
+            printf("Error: There is no correct answer\n");
+            break;
 	}
 }
 
@@ -74,12 +78,10 @@ struct RootsOfEquation linearEq(double b, double c)
         return { { NAN, NAN }, DOES_NOT_EXIST };
 
 	if (isTwoDoubleEqual(b, 0.0)) {
-
         if (isTwoDoubleEqual(c, 0.0))
             return { { 0, 0 }, ALL_SOLUTIONS };
         else
             return { { 0, 0 }, NO_SOLUTIONS };
-
 	} else
 		return { { -c / b, 0 }, ONE_SOLUTION };
 }
@@ -98,17 +100,14 @@ struct RootsOfEquation quadraticEq(double a, double b, double c)
 	if (0 <= d && d <= 0.000001)
 		return { { -b / (2 * a), 0 }, ONE_SOLUTION };
 	else {
-
         if (d > 0) {
             double root1 = (-b - sqrt(d)) / (2 * a), root2 = (-b + sqrt(d)) / (2 * a);
             if (root1 > root2)
                 swapDoubles(&root1, &root2);
-
             return { { root1, root2 }, TWO_SOLUTIONS };
         }
         else
             return { { 0, 0 }, NO_SOLUTIONS };
-
     }
 }
 
