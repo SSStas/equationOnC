@@ -18,8 +18,8 @@ enum SolutionsKinds {
 
 ///< Решения квадратного уравнения.
 struct RootsOfEquation {
-	double value[2];
-	enum SolutionsKinds solutionsCount;
+    double value[2];
+    enum SolutionsKinds solutionsCount;
 };
 
 /*!

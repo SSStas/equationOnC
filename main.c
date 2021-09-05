@@ -5,25 +5,25 @@
 
 
 void getConstants(double *a, double *b, double *c) {
-	while (1) {
-		if (scanf("%lf %lf %lf", a, b, c) != 3)
-			printf("Incorrect input\n");
-		else
-			break;
+    while (1) {
+        if (scanf("%lf %lf %lf", a, b, c) != 3)
+            printf("Incorrect input\n");
+        else
+            break;
 
-		fflush(stdin);
-	}
+        fflush(stdin);
+    }
 }
 
 int main() {
-	double a = NAN, b = NAN, c = NAN;
+    double a = NAN, b = NAN, c = NAN;
 
-	printf("Enter the values of the variables a, b and c (separated by a space):\n");
-	getConstants(&a, &b, &c);
+    printf("Enter the values of the variables a, b and c (separated by a space):\n");
+    getConstants(&a, &b, &c);
 
-	struct RootsOfEquation answer = quadraticEq(a, b, c);
-	showFuncOfQuadraticEq(a, b, c);
-	showAnswer(answer);
+    struct RootsOfEquation answer = quadraticEq(a, b, c);
+    showFuncOfQuadraticEq(a, b, c);
+    showAnswer(answer);
 
-	return 0;
+    return 0;
 }
