@@ -12,21 +12,15 @@ enum TestResults {
 
 enum KindsComments {
 	ITS_NOT_COMMENT = 0,
-	LINEAR_COMMENT = 1,
-	MULTILINEAR_COMMENT = 2
+	LINEAR_COMMENT = 1
 };
 
 
 enum KindsComments isComment(char word[]) {
 	assert(word != NULL);
 
-	if (word[0] == '#' && word[1] == '#' && word[2] == '#') {
-		return MULTILINEAR_COMMENT;
-	}
-
-	if (word[0] == '#') {
+	if (word[0] == '#')
 		return LINEAR_COMMENT;
-	}
 
 	return ITS_NOT_COMMENT;
 }
@@ -42,19 +36,6 @@ void passLinearComments(FILE *file) {
 	}
 }
 
-void passMultilinearComment(FILE *file) {
-	assert(file != NULL);
-
-	char extraString[1000] = {};
-	int isEOF = 0;
-	while (!isEOF) {
-		isEOF = ((fscanf(file, "%s", &extraString) == -1) ? 1 : 0);
-		if (isComment(extraString) == MULTILINEAR_COMMENT) {
-			break;
-		}
-	}
-}
-
 int getIntNumFromFile(FILE *file, int *value) {
 	assert(file != NULL);
 	assert(value != NULL);
@@ -65,13 +46,8 @@ int getIntNumFromFile(FILE *file, int *value) {
 		isGetNum = fscanf(file, "%d", value);
 		if (!isGetNum) {
 			fscanf(file, "%s", &extraString);
-
-			if (isComment(extraString) == LINEAR_COMMENT) {
+			if (isComment(extraString) == LINEAR_COMMENT)
 				passLinearComments(file);
-			}
-			else if (isComment(extraString) == MULTILINEAR_COMMENT) {
-				passMultilinearComment(file);
-			}
 		}
 	}
 
@@ -88,12 +64,8 @@ int getDoubleNumFromFile(FILE *file, double *value) {
 		isGetNum = fscanf(file, "%lf", value);
 		if (!isGetNum) {
 			fscanf(file, "%s", &extraString);
-			if (isComment(extraString) == LINEAR_COMMENT) {
+			if (isComment(extraString) == LINEAR_COMMENT)
 				passLinearComments(file);
-			}
-			else if (isComment(extraString) == MULTILINEAR_COMMENT) {
-				passMultilinearComment(file);
-			}
 		}
 	}
 
@@ -106,14 +78,12 @@ void showTestResult(int number, double a, double b, double c, struct RootsOfEqua
 	assert(isfinite(c));
 
 	int lenTitle = floorf(log10(number)) + 7;
-	for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++) {
+	for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++)
 		printf("-");
-	}
 
 	printf("\nTest #%d\n", number);
-	for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++) {
+	for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++)
 		printf("-");
-	}
 
 	printf("\n\nEquation: ");
 	showFuncOfQuadraticEq(a, b, c);
@@ -144,9 +114,8 @@ void testingQuadraticEq() {
 		int resValueB = getDoubleNumFromFile(dataTestsFile, &testB);
 		int resValueC = getDoubleNumFromFile(dataTestsFile, &testC);
 
-		if (!resValueA) {
+		if (!resValueA)
 			break;
-		}
 
 		if (!resValueB && !resValueC) {
 			printf("Error: Could not read the values of the constants\n");
@@ -173,14 +142,11 @@ void testingQuadraticEq() {
 			case ONE_SOLUTION:
 				if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq1)) == 1) {
 					if (programAnswer.solutionsCount == ONE_SOLUTION
-						&& isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1)) {
+						&& isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1))
 						shortTestResults[countTestResults++] = OK;
-					}
-					else {
+					else
 						shortTestResults[countTestResults++] = ERROR;
-					}
-				}
-				else {
+				} else {
 					printf("Error: Could not read the value of the root\n");
 					isErrorInFile = 1;
 				}
@@ -191,40 +157,32 @@ void testingQuadraticEq() {
 					if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq2)) == 1) {
 						if (programAnswer.solutionsCount == TWO_SOLUTIONS
 							&& isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1)
-							&& isTwoDoubleEqual(programAnswer.value[1], testRootOfEq2)) {
+							&& isTwoDoubleEqual(programAnswer.value[1], testRootOfEq2))
 							shortTestResults[countTestResults++] = OK;
-						}
-						else {
+						else
 							shortTestResults[countTestResults++] = ERROR;
-						}
-					}
-					else {
+					} else {
 						printf("Error: Could not read the value of the second root\n");
 						isErrorInFile = 1;
 					}
-				}
-				else {
+				} else {
 					printf("Error: Could not read the value of the first root\n");
 					isErrorInFile = 1;
 				}
 				break;
 
 			case ALL_SOLUTIONS:
-				if (programAnswer.solutionsCount == ALL_SOLUTIONS) {
+				if (programAnswer.solutionsCount == ALL_SOLUTIONS)
 					shortTestResults[countTestResults++] = OK;
-				}
-				else {
+				else
 					shortTestResults[countTestResults++] = ERROR;
-				}
 				break;
 
 			case NO_SOLUTIONS:
-				if (programAnswer.solutionsCount == NO_SOLUTIONS) {
+				if (programAnswer.solutionsCount == NO_SOLUTIONS)
 					shortTestResults[countTestResults++] = OK;
-				}
-				else {
+				else
 					shortTestResults[countTestResults++] = ERROR;
-				}
 				break;
 
 			default:
@@ -241,11 +199,9 @@ void testingQuadraticEq() {
 	}
 
 	// коротко выводит результаты о том, какие тесты пройдены, а какие нет
-	if (!isErrorInFile) {
-		for (int testNum = 0; testNum < countTestResults; testNum++) {
+	if (!isErrorInFile)
+		for (int testNum = 0; testNum < countTestResults; testNum++)
 			printf("Test #%d: %s\n", testNum + 1, ((shortTestResults[testNum]) ? "OK" : "ERROR"));
-		}
-	}
 
 	fclose(dataTestsFile);
 }

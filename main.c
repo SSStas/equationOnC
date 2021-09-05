@@ -4,21 +4,14 @@
 #include "quadratic.h"
 
 
-void cleanBuffer() {
-	while (getchar() != '\n') { ; }
-}
-
 void getConstants(double *a, double *b, double *c) {
-	int isContinue = 1;
-	while (isContinue) {
-		int countOfConstants = scanf("%lf %lf %lf", a, b, c);
-		if (countOfConstants != 3) {
+	while (1) {
+		if (scanf("%lf %lf %lf", a, b, c) != 3)
 			printf("Incorrect input\n");
-		}
-		else {
-			isContinue = 0;
-		}
-		cleanBuffer();
+		else
+			break;
+
+		fflush(stdin);
 	}
 }
 

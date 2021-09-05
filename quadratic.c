@@ -68,49 +68,41 @@ void showFuncOfQuadraticEq(double a, double b, double c) {
 
 // решение уравнения вида b*x + c = 0
 struct RootsOfEquation linearEq(double b, double c) {
-	if (!(isfinite(b) && isfinite(c))) {
+	if (!(isfinite(b) && isfinite(c)))
 		return { { NAN, NAN }, DOES_NOT_EXIST };
-	}
 
 	if (isTwoDoubleEqual(b, 0.0)) {
-		if (isTwoDoubleEqual(c, 0.0)) {
+		if (isTwoDoubleEqual(c, 0.0))
 			return { { 0, 0 }, ALL_SOLUTIONS };
-		}
-		else {
+		else
 			return { { 0, 0 }, NO_SOLUTIONS };
-		}
-	}
-	else {
+	} else
 		return { { -c / b, 0 }, ONE_SOLUTION };
-	}
 }
 
 // решение уравнения вида a*x^2 + b*x + c = 0
 struct RootsOfEquation quadraticEq(double a, double b, double c) {
-	if (!(isfinite(a) && isfinite(b) && isfinite(c))) {
+	if (!(isfinite(a) && isfinite(b) && isfinite(c)))
 		return { { NAN, NAN }, DOES_NOT_EXIST };
-	}
 
-	if (isTwoDoubleEqual(a, 0.0)) {
+	if (isTwoDoubleEqual(a, 0.0))
 		return linearEq(b, c);
-	}
 
 	double d = b * b - 4.0 * a * c;
+	if (!isfinite(d))
+        return { { NAN, NAN }, DOES_NOT_EXIST };
 
-	if (0 <= d && d <= 0.000001) {
+	if (0 <= d && d <= 0.000001)
 		return { { -b / (2 * a), 0 }, ONE_SOLUTION };
-	}
 	else {
 		if (d > 0) {
-			double root1 = (-b - sqrt(d)) / (2 * a), root2 = (-b + sqrt(d)) / (2 * a);
-			if (root1 > root2) {
+            double sqrtD = sqrt(d);
+			double root1 = (-b - sqrtD) / (2 * a), root2 = (-b + sqrtD) / (2 * a);
+			if (root1 > root2)
 				swapDoubles(&root1, &root2);
-			}
 			return { { root1, root2 }, TWO_SOLUTIONS };
-		}
-		else {
+		} else
 			return { { 0, 0 }, NO_SOLUTIONS };
-		}
 	}
 }
 
