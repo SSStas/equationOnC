@@ -5,9 +5,11 @@
 #include <assert.h>
 #include "quadratic.h"
 
+
 enum TestResults {
-    ERROR = 0,
-    OK = 1
+    WRONG_ANSWER = 0,
+    OK = 1,
+    ERROR = 2
 };
 
 enum KindsComments {
@@ -15,6 +17,14 @@ enum KindsComments {
     LINEAR_COMMENT = 1
 };
 
+struct TestData {
+    double a;
+    double b;
+    double c;
+    struct RootsOfEquation programSolution;
+    struct RootsOfEquation testSolution;
+    enum TestResults finalResult;
+};
 
 enum KindsComments isComment(char word[]) {
     assert(word != NULL);
@@ -72,10 +82,11 @@ int getDoubleNumFromFile(FILE *file, double *value) {
     return isGetNum != -1;
 }
 
-void showTestResult(int number, double a, double b, double c, struct RootsOfEquation testAnswer, struct RootsOfEquation programAnswer) {
-    assert(isfinite(a));
-    assert(isfinite(b));
-    assert(isfinite(c));
+void showTestResult(int number, struct TestData test) {
+    if ( test.finalResult == ERROR || !(isfinite(test.a) && isfinite(test.b) && isfinite(test.c)) ) {
+        printf("Error: Incorrect format of test");
+        return;
+    }
 
     int lenTitle = floorf(log10(number)) + 7;
     for (int sizeLine = 0; sizeLine < lenTitle; sizeLine++)
@@ -86,129 +97,137 @@ void showTestResult(int number, double a, double b, double c, struct RootsOfEqua
         printf("-");
 
     printf("\n\nEquation: ");
-    showFuncOfQuadraticEq(a, b, c);
+    showFuncOfQuadraticEq(test.a, test.b, test.c);
     printf("\nProgram output:\n");
-    showAnswer(programAnswer);
+    showAnswer(test.programSolution);
     printf("\nTest output:\n");
-    showAnswer(testAnswer);
-    printf("\n");
+    showAnswer(test.testSolution);
+    printf("\nResult: %s\n\n\n", ((test.finalResult) ? "OK" : "WRONG ANSWER"));
 }
 
-void testingQuadraticEq() {
-    enum TestResults shortTestResults[1000] = { ERROR };
+int getTestsOfQuadraticEq(struct TestData testsData[], int maxLenTestsArray) {
+    assert(testsData != NULL);
+    assert(maxLenTestsArray > 0);
+
     int countTestResults = 0;
-    int isErrorInFile = 0;
     FILE *dataTestsFile = fopen("tests.txt", "r");
 
-    if (dataTestsFile == NULL) {
-        printf("Error: Could not read the file \"tests.txt\"\n");
-        return;
-    }
+    if (dataTestsFile == NULL)
+        return 0;
 
-    int isContinueInput = 1;
-    while (isContinueInput) {
-        double testA = NAN, testB = NAN, testC = NAN;
+    while (1) {
+        struct TestData testNow = { NAN, NAN, NAN, { { NAN, NAN }, DOES_NOT_EXIST }, { { NAN, NAN }, DOES_NOT_EXIST }, ERROR };
 
         // Переменные вида resValue хранят данные о том, смогли ли присвоить присвоить testA, testB и testC числовые значения
-        int resValueA = getDoubleNumFromFile(dataTestsFile, &testA);
-        int resValueB = getDoubleNumFromFile(dataTestsFile, &testB);
-        int resValueC = getDoubleNumFromFile(dataTestsFile, &testC);
+        int resValueA = getDoubleNumFromFile(dataTestsFile, &testNow.a);
+        int resValueB = getDoubleNumFromFile(dataTestsFile, &testNow.b);
+        int resValueC = getDoubleNumFromFile(dataTestsFile, &testNow.c);
 
-        if (!resValueA)
-            break;
+        if (!resValueA || countTestResults >= maxLenTestsArray) {
+            fclose(dataTestsFile);
+            return countTestResults;
+        }
 
         if (!resValueB && !resValueC) {
-            printf("Error: Could not read the values of the constants\n");
-            isErrorInFile = 1;
+            testsData[countTestResults++] = testNow;
             break;
         }
 
-        if (!(isfinite(testA) && isfinite(testB) && isfinite(testC))) {
-            printf("Error: Invalid values\n");
-            isErrorInFile = 1;
+        if (!(isfinite(testNow.a) && isfinite(testNow.b) && isfinite(testNow.c))) {
+            testsData[countTestResults++] = testNow;
             break;
         }
 
         int kindAnswer = -1;
         if (!getIntNumFromFile(dataTestsFile, &kindAnswer)) {
-            printf("Error: Could not read the response format value\n");
-            isErrorInFile = 1;
+            testsData[countTestResults++] = testNow;
             break;
         }
 
-        double testRootOfEq1 = NAN, testRootOfEq2 = NAN;
-        struct RootsOfEquation programAnswer = quadraticEq(testA, testB, testC);
+        testNow.programSolution = quadraticEq(testNow.a, testNow.b, testNow.c);
         switch (kindAnswer) {
             case ONE_SOLUTION:
-                if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq1)) == 1) {
-                    if (programAnswer.solutionsCount == ONE_SOLUTION
-                        && isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1))
-                        shortTestResults[countTestResults++] = OK;
+                testNow.testSolution.solutionsCount = ONE_SOLUTION;
+                if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[0])) {
+                    if (testNow.programSolution.solutionsCount == ONE_SOLUTION
+                        && isTwoDoubleEqual(testNow.programSolution.value[0], testNow.testSolution.value[0]))
+                        testNow.finalResult = OK;
                     else
-                        shortTestResults[countTestResults++] = ERROR;
+                        testNow.finalResult = WRONG_ANSWER;
+                    testsData[countTestResults++] = testNow;
                 } else {
-                    printf("Error: Could not read the value of the root\n");
-                    isErrorInFile = 1;
+                    testsData[countTestResults++] = testNow;
+                    fclose(dataTestsFile);
+                    return countTestResults;
                 }
                 break;
 
             case TWO_SOLUTIONS:
-                if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq1)) == 1) {
-                    if ((isContinueInput = getDoubleNumFromFile(dataTestsFile, &testRootOfEq2)) == 1) {
-                        if (programAnswer.solutionsCount == TWO_SOLUTIONS
-                            && isTwoDoubleEqual(programAnswer.value[0], testRootOfEq1)
-                            && isTwoDoubleEqual(programAnswer.value[1], testRootOfEq2))
-                            shortTestResults[countTestResults++] = OK;
+                testNow.testSolution.solutionsCount = TWO_SOLUTIONS;
+                if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[0])) {
+                    if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[1])) {
+                        if (testNow.programSolution.solutionsCount == TWO_SOLUTIONS
+                            && isTwoDoubleEqual(testNow.programSolution.value[0], testNow.testSolution.value[0])
+                            && isTwoDoubleEqual(testNow.programSolution.value[1], testNow.testSolution.value[1]))
+                            testNow.finalResult = OK;
                         else
-                            shortTestResults[countTestResults++] = ERROR;
+                            testNow.finalResult = WRONG_ANSWER;
+                        testsData[countTestResults++] = testNow;
                     } else {
-                        printf("Error: Could not read the value of the second root\n");
-                        isErrorInFile = 1;
+                        testsData[countTestResults++] = testNow;
+                        fclose(dataTestsFile);
+                        return countTestResults;
                     }
                 } else {
-                    printf("Error: Could not read the value of the first root\n");
-                    isErrorInFile = 1;
+                    testsData[countTestResults++] = testNow;
+                    fclose(dataTestsFile);
+                    return countTestResults;
                 }
                 break;
 
             case ALL_SOLUTIONS:
-                if (programAnswer.solutionsCount == ALL_SOLUTIONS)
-                    shortTestResults[countTestResults++] = OK;
+                testNow.testSolution.solutionsCount = ALL_SOLUTIONS;
+                if (testNow.programSolution.solutionsCount == ALL_SOLUTIONS)
+                    testNow.finalResult = OK;
                 else
-                    shortTestResults[countTestResults++] = ERROR;
+                    testNow.finalResult = WRONG_ANSWER;
+                testsData[countTestResults++] = testNow;
                 break;
 
             case NO_SOLUTIONS:
-                if (programAnswer.solutionsCount == NO_SOLUTIONS)
-                    shortTestResults[countTestResults++] = OK;
+                testNow.testSolution.solutionsCount = NO_SOLUTIONS;
+                if (testNow.programSolution.solutionsCount == NO_SOLUTIONS)
+                    testNow.finalResult = OK;
                 else
-                    shortTestResults[countTestResults++] = ERROR;
+                    testNow.finalResult = WRONG_ANSWER;
+                testsData[countTestResults++] = testNow;
                 break;
 
             default:
-                isContinueInput = 0;
-                printf("Error: Invalid value of answer's type\n");
-                isErrorInFile = 1;
+                testsData[countTestResults++] = testNow;
+                fclose(dataTestsFile);
+                return countTestResults;
                 break;
-        }
-
-        if (isContinueInput == 1) {
-            showTestResult(countTestResults, testA, testB, testC, { {testRootOfEq1, testRootOfEq2}, (enum SolutionsKinds) (kindAnswer) }, programAnswer);
-            printf("Result: %s\n\n\n", ((shortTestResults[countTestResults - 1]) ? "OK" : "ERROR"));
         }
     }
 
-    // коротко выводит результаты о том, какие тесты пройдены, а какие нет
-    if (!isErrorInFile)
-        for (int testNum = 0; testNum < countTestResults; testNum++)
-            printf("Test #%d: %s\n", testNum + 1, ((shortTestResults[testNum]) ? "OK" : "ERROR"));
-
     fclose(dataTestsFile);
+    return countTestResults;
 }
 
 int main() {
+    struct TestData testsData[1000] = {};
+
     printf("Unit-tests of the quadratic equations:\n");
-    testingQuadraticEq();
+    int countTestResults = getTestsOfQuadraticEq(testsData, 1000);
+
+    for (int testNum = 0; testNum < countTestResults; testNum++)
+        showTestResult(testNum + 1, testsData[testNum]);
+
+    // коротко выводит результаты о том, какие тесты пройдены, а какие нет
+    if (testsData[countTestResults - 1].finalResult != ERROR)
+        for (int testNum = 0; testNum < countTestResults; testNum++)
+            printf("Test #%d: %s\n", testNum + 1, ((testsData[testNum].finalResult) ? "OK" : "WRONG ANSWER"));
 
     return 0;
 }
