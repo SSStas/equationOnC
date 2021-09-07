@@ -49,16 +49,19 @@ void testingQuadraticEq(struct TestData testsData[], int maxLenTestsArray) {
 
     for (int testIndex = 0; testIndex < maxLenTestsArray; testIndex++) {
 
-        if (!(isfinite(testsData[testIndex].a) && isfinite(testsData[testIndex].b) && isfinite(testsData[testIndex].c))) {
+        double a = testsData[testIndex].a, b = testsData[testIndex].b, c = testsData[testIndex].c;
+        struct RootsOfEquation testSolution = testsData[testIndex].testSolution;
+
+        if ( !(isfinite(a) && isfinite(b) && isfinite(c)) ) {
             printf("Error: Incorrect format of constants in test #%d\n", testIndex + 1);
             break;
         }
 
-        struct RootsOfEquation programSolution = quadraticEq(testsData[testIndex].a, testsData[testIndex].b, testsData[testIndex].c);
-        switch (testsData[testIndex].testSolution.solutionsCount) {
+        struct RootsOfEquation programSolution = quadraticEq(a, b, c);
+        switch (testSolution.solutionsCount) {
             case ONE_SOLUTION:
-                if (isfinite(testsData[testIndex].testSolution.value[0])) {
-                    if (programSolution.solutionsCount == ONE_SOLUTION && isTwoDoubleEqual(programSolution.value[0], testsData[testIndex].testSolution.value[0]))
+                if (isfinite(testSolution.value[0])) {
+                    if (programSolution.solutionsCount == ONE_SOLUTION && isTwoDoubleEqual(programSolution.value[0], testSolution.value[0]))
                         finalResult[testIndex] = OK;
                     else
                         finalResult[testIndex] = WRONG_ANSWER;
@@ -70,10 +73,10 @@ void testingQuadraticEq(struct TestData testsData[], int maxLenTestsArray) {
                 break;
 
             case TWO_SOLUTIONS:
-                if (isfinite(testsData[testIndex].testSolution.value[0]) && isfinite(testsData[testIndex].testSolution.value[1])) {
+                if (isfinite(testSolution.value[0]) && isfinite(testSolution.value[1])) {
                     if (programSolution.solutionsCount == TWO_SOLUTIONS
-                        && isTwoDoubleEqual(programSolution.value[0], testsData[testIndex].testSolution.value[0])
-                        && isTwoDoubleEqual(programSolution.value[1], testsData[testIndex].testSolution.value[1]))
+                        && isTwoDoubleEqual(programSolution.value[0], testSolution.value[0])
+                        && isTwoDoubleEqual(programSolution.value[1], testSolution.value[1]))
                         finalResult[testIndex] = OK;
                     else
                         finalResult[testIndex] = WRONG_ANSWER;

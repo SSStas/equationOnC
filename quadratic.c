@@ -5,9 +5,11 @@
 #include <assert.h>
 #include "quadratic.h"
 
+#define EPS 0.000001
+
 
 int isTwoDoubleEqual(double value1, double value2) {
-    return ((isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < 0.000001) : 0);
+    return ((isfinite(value1) && isfinite(value2)) ? (fabs(value1 - value2) < EPS) : 0);
 }
 
 char getSignOfDouble(double value) {
@@ -92,7 +94,7 @@ struct RootsOfEquation quadraticEq(double a, double b, double c) {
     if (!isfinite(d))
         return { { NAN, NAN }, DOES_NOT_EXIST };
 
-    if (0 <= d && d <= 0.000001)
+    if (0 <= d && d <= EPS)
         return { { -b / (2 * a), 0 }, ONE_SOLUTION };
     else {
         if (d > 0) {
