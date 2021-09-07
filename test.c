@@ -8,82 +8,18 @@
 
 enum TestResults {
     WRONG_ANSWER = 0,
-    OK = 1,
-    ERROR = 2
-};
-
-enum KindsComments {
-    ITS_NOT_COMMENT = 0,
-    LINEAR_COMMENT = 1
+    OK = 1
 };
 
 struct TestData {
     double a;
     double b;
     double c;
-    struct RootsOfEquation programSolution;
     struct RootsOfEquation testSolution;
-    enum TestResults finalResult;
 };
 
-enum KindsComments isComment(char word[]) {
-    assert(word != NULL);
-
-    if (word[0] == '#')
-        return LINEAR_COMMENT;
-
-    return ITS_NOT_COMMENT;
-}
-
-void passLinearComments(FILE *file) {
-    assert(file != NULL);
-
-    char ch = '0';
-    while ((ch = fgetc(file)) != EOF) {
-        if (ch == '\n') {
-            break;
-        }
-    }
-}
-
-int getIntNumFromFile(FILE *file, int *value) {
-    assert(file != NULL);
-    assert(value != NULL);
-
-    char extraString[1000] = {};
-    int isGetNum = 0;
-    while (!isGetNum) {
-        isGetNum = fscanf(file, "%d", value);
-        if (!isGetNum) {
-            fscanf(file, "%s", &extraString);
-            if (isComment(extraString) == LINEAR_COMMENT)
-                passLinearComments(file);
-        }
-    }
-
-    return isGetNum != -1;
-}
-
-int getDoubleNumFromFile(FILE *file, double *value) {
-    assert(file != NULL);
-    assert(value != NULL);
-
-    char extraString[1000] = {};
-    int isGetNum = 0;
-    while (!isGetNum) {
-        isGetNum = fscanf(file, "%lf", value);
-        if (!isGetNum) {
-            fscanf(file, "%s", &extraString);
-            if (isComment(extraString) == LINEAR_COMMENT)
-                passLinearComments(file);
-        }
-    }
-
-    return isGetNum != -1;
-}
-
-void showTestResult(int number, struct TestData test) {
-    if ( test.finalResult == ERROR || !(isfinite(test.a) && isfinite(test.b) && isfinite(test.c)) ) {
+void showTestParam(int number, struct TestData test, struct RootsOfEquation programSolution) {
+    if ( !(isfinite(test.a) && isfinite(test.b) && isfinite(test.c)) ) {
         printf("Error: Incorrect format of test");
         return;
     }
@@ -99,135 +35,105 @@ void showTestResult(int number, struct TestData test) {
     printf("\n\nEquation: ");
     showFuncOfQuadraticEq(test.a, test.b, test.c);
     printf("\nProgram output:\n");
-    showAnswer(test.programSolution);
+    showAnswer(programSolution);
     printf("\nTest output:\n");
     showAnswer(test.testSolution);
-    printf("\nResult: %s\n\n\n", ((test.finalResult) ? "OK" : "WRONG ANSWER"));
+    printf("\n");
 }
 
-int getTestsOfQuadraticEq(struct TestData testsData[], int maxLenTestsArray) {
+void testingQuadraticEq(struct TestData testsData[], int maxLenTestsArray) {
     assert(testsData != NULL);
     assert(maxLenTestsArray > 0);
 
-    int countTestResults = 0;
-    FILE *dataTestsFile = fopen("tests.txt", "r");
+    enum TestResults finalResult[maxLenTestsArray];
 
-    if (dataTestsFile == NULL)
-        return 0;
+    for (int testIndex = 0; testIndex < maxLenTestsArray; testIndex++) {
 
-    while (1) {
-        struct TestData testNow = { NAN, NAN, NAN, { { NAN, NAN }, DOES_NOT_EXIST }, { { NAN, NAN }, DOES_NOT_EXIST }, ERROR };
-
-        // Переменные вида resValue хранят данные о том, смогли ли присвоить присвоить testA, testB и testC числовые значения
-        int resValueA = getDoubleNumFromFile(dataTestsFile, &testNow.a);
-        int resValueB = getDoubleNumFromFile(dataTestsFile, &testNow.b);
-        int resValueC = getDoubleNumFromFile(dataTestsFile, &testNow.c);
-
-        if (!resValueA || countTestResults >= maxLenTestsArray) {
-            fclose(dataTestsFile);
-            return countTestResults;
-        }
-
-        if (!resValueB && !resValueC) {
-            testsData[countTestResults++] = testNow;
+        if (!(isfinite(testsData[testIndex].a) && isfinite(testsData[testIndex].b) && isfinite(testsData[testIndex].c))) {
+            printf("Error: Incorrect format of constants in test #%d\n", testIndex + 1);
             break;
         }
 
-        if (!(isfinite(testNow.a) && isfinite(testNow.b) && isfinite(testNow.c))) {
-            testsData[countTestResults++] = testNow;
-            break;
-        }
-
-        int kindAnswer = -1;
-        if (!getIntNumFromFile(dataTestsFile, &kindAnswer)) {
-            testsData[countTestResults++] = testNow;
-            break;
-        }
-
-        testNow.programSolution = quadraticEq(testNow.a, testNow.b, testNow.c);
-        switch (kindAnswer) {
+        struct RootsOfEquation programSolution = quadraticEq(testsData[testIndex].a, testsData[testIndex].b, testsData[testIndex].c);
+        switch (testsData[testIndex].testSolution.solutionsCount) {
             case ONE_SOLUTION:
-                testNow.testSolution.solutionsCount = ONE_SOLUTION;
-                if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[0])) {
-                    if (testNow.programSolution.solutionsCount == ONE_SOLUTION
-                        && isTwoDoubleEqual(testNow.programSolution.value[0], testNow.testSolution.value[0]))
-                        testNow.finalResult = OK;
+                if (isfinite(testsData[testIndex].testSolution.value[0])) {
+                    if (programSolution.solutionsCount == ONE_SOLUTION && isTwoDoubleEqual(programSolution.value[0], testsData[testIndex].testSolution.value[0]))
+                        finalResult[testIndex] = OK;
                     else
-                        testNow.finalResult = WRONG_ANSWER;
-                    testsData[countTestResults++] = testNow;
+                        finalResult[testIndex] = WRONG_ANSWER;
+                    showTestParam(testIndex + 1, testsData[testIndex], programSolution);
                 } else {
-                    testsData[countTestResults++] = testNow;
-                    fclose(dataTestsFile);
-                    return countTestResults;
+                    printf("Error: Incorrect format of answer's value in test #%d\n", testIndex + 1);
+                    return;
                 }
                 break;
 
             case TWO_SOLUTIONS:
-                testNow.testSolution.solutionsCount = TWO_SOLUTIONS;
-                if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[0])) {
-                    if (getDoubleNumFromFile(dataTestsFile, &testNow.testSolution.value[1])) {
-                        if (testNow.programSolution.solutionsCount == TWO_SOLUTIONS
-                            && isTwoDoubleEqual(testNow.programSolution.value[0], testNow.testSolution.value[0])
-                            && isTwoDoubleEqual(testNow.programSolution.value[1], testNow.testSolution.value[1]))
-                            testNow.finalResult = OK;
-                        else
-                            testNow.finalResult = WRONG_ANSWER;
-                        testsData[countTestResults++] = testNow;
-                    } else {
-                        testsData[countTestResults++] = testNow;
-                        fclose(dataTestsFile);
-                        return countTestResults;
-                    }
+                if (isfinite(testsData[testIndex].testSolution.value[0]) && isfinite(testsData[testIndex].testSolution.value[1])) {
+                    if (programSolution.solutionsCount == TWO_SOLUTIONS
+                        && isTwoDoubleEqual(programSolution.value[0], testsData[testIndex].testSolution.value[0])
+                        && isTwoDoubleEqual(programSolution.value[1], testsData[testIndex].testSolution.value[1]))
+                        finalResult[testIndex] = OK;
+                    else
+                        finalResult[testIndex] = WRONG_ANSWER;
+                    showTestParam(testIndex + 1, testsData[testIndex], programSolution);
                 } else {
-                    testsData[countTestResults++] = testNow;
-                    fclose(dataTestsFile);
-                    return countTestResults;
+                    printf("Error: Incorrect format of answer's value(s) in test #%d\n", testIndex + 1);
+                    return;
                 }
                 break;
 
             case ALL_SOLUTIONS:
-                testNow.testSolution.solutionsCount = ALL_SOLUTIONS;
-                if (testNow.programSolution.solutionsCount == ALL_SOLUTIONS)
-                    testNow.finalResult = OK;
+                if (programSolution.solutionsCount == ALL_SOLUTIONS)
+                    finalResult[testIndex] = OK;
                 else
-                    testNow.finalResult = WRONG_ANSWER;
-                testsData[countTestResults++] = testNow;
+                    finalResult[testIndex] = WRONG_ANSWER;
+                showTestParam(testIndex + 1, testsData[testIndex], programSolution);
+
                 break;
 
             case NO_SOLUTIONS:
-                testNow.testSolution.solutionsCount = NO_SOLUTIONS;
-                if (testNow.programSolution.solutionsCount == NO_SOLUTIONS)
-                    testNow.finalResult = OK;
+                if (programSolution.solutionsCount == NO_SOLUTIONS)
+                    finalResult[testIndex] = OK;
                 else
-                    testNow.finalResult = WRONG_ANSWER;
-                testsData[countTestResults++] = testNow;
+                    finalResult[testIndex] = WRONG_ANSWER;
+                showTestParam(testIndex + 1, testsData[testIndex], programSolution);
                 break;
 
             default:
-                testsData[countTestResults++] = testNow;
-                fclose(dataTestsFile);
-                return countTestResults;
-                break;
+                printf("Error: Incorrect format of test's solution in test #%d\n", testIndex + 1);
+                return;
         }
+        printf("Result: %s\n\n\n", ((finalResult[testIndex - 1]) ? "OK" : "WRONG ANSWER"));
     }
 
-    fclose(dataTestsFile);
-    return countTestResults;
+    // коротко выводит результаты о том, какие тесты пройдены, а какие нет
+    for (int testNum = 0; testNum < maxLenTestsArray; testNum++)
+        printf("Test #%d: %s\n", testNum + 1, ((finalResult[testNum]) ? "OK" : "WRONG ANSWER"));
 }
 
 int main() {
-    struct TestData testsData[1000] = {};
+    struct TestData testsData[] = {
+        { 0,                    0,                  0,              { { NAN, NAN },             ALL_SOLUTIONS } },
+        { 0,                    0,                  3,              { { NAN, NAN },             NO_SOLUTIONS }  },
+        { 0,                    0,                  1234.5678,      { { NAN, NAN },             NO_SOLUTIONS }  },
+        { 0,                    69,                 0,              { { 0, NAN },               ONE_SOLUTION }  },
+        { 0,                    999,                -105,           { { 0.105105, NAN },        ONE_SOLUTION }  },
+        { 0,                    8723654.123457654,  56432.3456345,  { { -0.006469, NAN },       ONE_SOLUTION }  },
+        { 125,                  -50,                5,              { { 0.2, NAN },             ONE_SOLUTION }  },
+        { 45,                   45,                 11.25,          { { -0.5, NAN },            ONE_SOLUTION }  },
+        { -380.25,              78,                 -4,             { { 0.102564, NAN },        ONE_SOLUTION }  },
+        { 3458.23456,           23456.234,          -21345.6543,    { { -7.595374, 0.812654 },  TWO_SOLUTIONS } },
+        { 1,                    2,                  -3,             { { -3, 1 },                TWO_SOLUTIONS } },
+        { -1,                   2,                  0,              { { 0, 2 },                 TWO_SOLUTIONS } },
+        { 495564.9387465672,    -4.619452345,       558811.5568555, { { NAN, NAN },             NO_SOLUTIONS }  },
+        { 5,                    10,                 1000,           { { NAN, NAN },             NO_SOLUTIONS }  },
+        { -10,                  8,                  -2,             { { NAN, NAN },             NO_SOLUTIONS }  },
+    };
 
     printf("Unit-tests of the quadratic equations:\n");
-    int countTestResults = getTestsOfQuadraticEq(testsData, 1000);
-
-    for (int testNum = 0; testNum < countTestResults; testNum++)
-        showTestResult(testNum + 1, testsData[testNum]);
-
-    // коротко выводит результаты о том, какие тесты пройдены, а какие нет
-    if (testsData[countTestResults - 1].finalResult != ERROR)
-        for (int testNum = 0; testNum < countTestResults; testNum++)
-            printf("Test #%d: %s\n", testNum + 1, ((testsData[testNum].finalResult) ? "OK" : "WRONG ANSWER"));
+    testingQuadraticEq(testsData, 15);
 
     return 0;
 }
