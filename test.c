@@ -133,7 +133,7 @@ int main() {
     };
 
     printf("Unit-tests of the quadratic equations:\n");
-    testingQuadraticEq(testsData, 15);
+    testingQuadraticEq(testsData, sizeof(testsData) / sizeof(testsData[0]));
 
     return 0;
 }
